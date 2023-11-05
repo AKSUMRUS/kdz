@@ -61,11 +61,6 @@ int main() {
 
         heapSort(v);
 
-        for(auto x: v) {
-            std::cout << x << " ";
-        }
-        std::cout << "\n";
-
         std::time_t endTime = std::clock();
 
         std::cout << ((double) endTime - startTime)/CLOCKS_PER_SEC  << "\n";
