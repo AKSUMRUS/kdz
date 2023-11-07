@@ -1,73 +1,119 @@
 #include <algorithm>
 #include <iostream>
-#include <iterator>
 #include <vector>
-#include <ctime>
 #include <stdio.h>
 #include <random>
+#include <unordered_map>
+#include <chrono>
 
-std::mt19937 rnd(time(0));
+//std::mt19937 rng(std::chrono::high_resolution_clock::now().time_since_epoch().count());
 
-int maxDepth = 0;
+int maxDepth = 1;
 
-class SkipListNode {
-    public:
-        int value;
-        std::vector<SkipListNode*> next;
-
-        SkipListNode(int value) : value(value)  {
-            next.assign(maxDepth+1, nullptr);
-        }
-};
-
-int flipCoin() {
-    return rnd()%2;
+bool flipCoin() {
+    return rand()&1;
 }
 
-int insert(SkipListNode* root, int value, int depth = 0) {
-    if(root->next[depth] == nullptr) {
-        if(depth == maxDepth) {
-            root->next[depth] = new SkipListNode(value);
-            // ...
-            return 1;
-        } else {
-            bool res = insert(root, value, depth+1);
-            res &= flipCoin();
-            if(res) {
-                SkipListNode* next = root->next[depth];
-                root->next[depth] = root->next[depth+1];
-                root->next[depth]->next[depth] = next;
-            }
+class SkipListNode {
+public:
+    int value;
+    std::vector<SkipListNode *> next;
 
-            return res;
+    SkipListNode(int value) : value(value), next(maxDepth+1, nullptr) {}
+};
+
+//if (root->next[depth] == nullptr) {
+//if (depth == maxDepth) {
+//root->next[depth] = new SkipListNode(value);
+//return 1;
+//} else {
+//bool res = insert(root, value, depth + 1);
+//if(res) {
+//res = flipCoin();
+//}
+////            std::cout << value << " " << depth << " " << res << "\n";
+//if (res) {
+//root->next[depth] = root->next[depth + 1];
+//root->next[depth]->next[depth] = nullptr;
+//}
+//
+//return res;
+//}
+//} else if (root->next[depth]->value <= value) {
+//return insert(root->next[depth], value);
+//} else if (root->next[depth]->value > value) {
+//if (depth == maxDepth) {
+//SkipListNode *newNode = new SkipListNode(value);
+//newNode->next[depth] = root->next[depth];
+//root->next[depth] = newNode;
+//return 1;
+//} else {
+//bool res = insert(root, value, depth + 1);
+//if(res) {
+//res = flipCoin();
+//}
+////            std::cout << value << " " << depth << " " << res << "\n";
+//if (res) {
+//SkipListNode *next = root->next[depth];
+//root->next[depth] = root->next[depth + 1];
+//root->next[depth]->next[depth] = next;
+//}
+//
+//return res;
+//}
+//}
+
+SkipListNode* insert(SkipListNode *root, int value, int depth = 0) {
+    if(!root->next[depth]) {
+        if (depth == maxDepth) {
+            SkipListNode *newNode = new SkipListNode(value);
+            root->next[depth] = newNode;
+            return newNode;
+        } else {
+            SkipListNode *newNode = insert(root, value, depth + 1);
+            bool res = false;
+            if (newNode) {
+                res = flipCoin();
+            }
+            if (res) {
+                root->next[depth] = newNode;
+                return newNode;
+            } else {
+                return nullptr;
+            }
         }
-    } else if(root->next[depth]->value <= value) {
-        insert(root->next[depth], value);
-    } else if(root->next[depth]->value > value) {
+    } else if(value >= root->next[depth]->value) {
+        return insert(root->next[depth], value, depth);
+    } else if(value < root->next[depth]->value) {
         if(depth == maxDepth) {
             SkipListNode* newNode = new SkipListNode(value);
             newNode->next[depth] = root->next[depth];
             root->next[depth] = newNode;
-            return 1;
+            return newNode;
         } else {
-            bool res = insert(root, value, depth+1);
-            res &= flipCoin();
-            if(res) {
-                SkipListNode* next = root->next[depth];
-                root->next[depth] = root->next[depth+1];
-                root->next[depth]->next[depth] = next;
+            SkipListNode* newNode = insert(root, value, depth+1);
+            bool res = false;
+            if (newNode) {
+                res = flipCoin();
             }
-
-            return res;
+            if (res) {
+                newNode->next[depth] = root->next[depth];
+                root->next[depth] = newNode;
+                return newNode;
+            } else {
+                return nullptr;
+            }
         }
     }
 
-    return 0;
+    return nullptr;
 }
 
 int main() {
     freopen("build/tests.txt", "r", stdin);
     freopen("build/skip_list_sort_results", "w", stdout);
+
+    srand(time(0));
 
     int t;
     std::cin >> t;
@@ -86,27 +132,31 @@ int main() {
             ++maxDepth;
         }
 
-        SkipListNode* root = nullptr;
+        SkipListNode *root = new SkipListNode(0);
 
-        for(int i = 0; i < n; ++i) {
-            int x;
+        int x;
+        for (int i = 0; i < n; ++i) {
             std::cin >> x;
-            if(i == 0) {
-                root = new SkipListNode(x);
-            } else if(root->value > x) {
-                SkipListNode* newRoot = new SkipListNode(x);
-                for(int j = 0;j <= maxDepth; ++j) {
-                    newRoot->next[j] = root;
-                }
-                root = newRoot;
-            } else {
-                insert(root, x);
-            }
+            insert(root, x);
         }
 
         std::time_t endTime = std::clock();
 
-        std::cout << ((double) endTime - startTime)/CLOCKS_PER_SEC  << "\n";
+        //        Cout the sorted array, answer is in i = maxDepth
+//        std::cout << maxDepth << "\n";
+//        for (int i = 0; i <= maxDepth; ++i) {
+//            SkipListNode *a = root;
+//            std::cout << "? ";
+//            while (a) {
+//                a = a->next[i];
+//                if (a) {
+//                    std::cout << a->value << " ";
+//                }
+//            }
+//            std::cout << "\n";
+//        }
+
+        std::cout << ((double) endTime - startTime) / CLOCKS_PER_SEC << "\n";
 
     }
     return 0;
