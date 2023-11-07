@@ -2,7 +2,16 @@ CCOMPILER = g++
 BUILD_FOLDER = build
 
 .PHONY: all
-all: compile generate_tests merge_sort insertion_sort heap_sort skip_list_sort insertion_binsearch_sort
+all: compile basic big strings
+
+.PHONY: basic
+basic: compile generate_tests insertion_sort merge_sort
+
+.PHONY: big
+big: compile generate_big_tests merge_sort heap_sort skip_list_sort quick_sort quick_5_sort
+
+.PHONY: strings
+strings: compile generate_string_tests insertion_string_sort insertion_string_binsearch_sort
 
 .PHONY: compile
 compile:
@@ -20,17 +29,29 @@ quick_sort: compile quick_sort.cpp
 	mv quick_sort $(BUILD_FOLDER)
 	./$(BUILD_FOLDER)/quick_sort
 
+.PHONY: quick_5_sort
+quick_5_sort: compile quick_5_sort.cpp
+	$(CCOMPILER) quick_5_sort.cpp -o quick_5_sort
+	mv quick_5_sort $(BUILD_FOLDER)
+	./$(BUILD_FOLDER)/quick_5_sort
+
 .PHONY: insertion_sort
 insertion_sort: compile insertion_sort.cpp
 	$(CCOMPILER) insertion_sort.cpp -o insertion_sort
 	mv insertion_sort $(BUILD_FOLDER)
 	./$(BUILD_FOLDER)/insertion_sort
 
-.PHONY: insertion_binsearch_sort
-insertion_binsearch_sort: compile insertion_binsearch_sort.cpp
-	$(CCOMPILER) insertion_binsearch_sort.cpp -o insertion_binsearch_sort
-	mv insertion_binsearch_sort $(BUILD_FOLDER)
-	./$(BUILD_FOLDER)/insertion_binsearch_sort
+.PHONY: insertion_string_sort
+insertion_string_sort: compile insertion_string_sort.cpp
+	$(CCOMPILER) insertion_string_sort.cpp -o insertion_string_sort
+	mv insertion_string_sort $(BUILD_FOLDER)
+	./$(BUILD_FOLDER)/insertion_string_sort
+
+.PHONY: insertion_string_binsearch_sort
+insertion_string_binsearch_sort: compile insertion_string_binsearch_sort.cpp
+	$(CCOMPILER) insertion_string_binsearch_sort.cpp -o insertion_string_binsearch_sort
+	mv insertion_string_binsearch_sort $(BUILD_FOLDER)
+	./$(BUILD_FOLDER)/insertion_string_binsearch_sort
 
 .PHONY: heap_sort
 heap_sort: compile heap_sort.cpp
@@ -47,6 +68,14 @@ skip_list_sort: compile skip_list_sort.cpp
 .PHONY: generate_tests
 generate_tests: 
 	python3 generate_tests.py
+
+.PHONY: generate_big_tests
+generate_big_tests:
+	python3 generate_big_tests.py
+
+.PHONY: generate_string_tests
+generate_string_tests:
+	python3 generate_string_tests.py
 	
 .PHONY: clean
 clean:

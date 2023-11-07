@@ -70,14 +70,22 @@ void quickSort(std::vector<int> &v, int l, int r) {
     if (l < r) {
         int index = divide(v, l, r);
 
-        quickSort(v, l, index);
-        quickSort(v, index + 1, r);
+        if(index-l+1 == 5) {
+            sort5Items(v,l);
+        } else {
+            quickSort(v, l, index);
+        }
+        if(r-index == 5) {
+            sort5Items(v,index+1);
+        } else {
+            quickSort(v, index + 1, r);
+        }
     }
 }
 
 int main() {
     freopen("build/tests.txt", "r", stdin);
-    freopen("build/merge_sort_results", "w", stdout);
+    freopen("build/quick_sort_5_results", "w", stdout);
 
     int t;
     std::cin >> t;
